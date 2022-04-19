@@ -1,6 +1,5 @@
 #%%
 import numpy as np
-import time
 
 def fitness_measure(inputs, pop):
     #Cálculo da aptidão de cada indíviduo contido na população
