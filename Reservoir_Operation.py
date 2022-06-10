@@ -1,3 +1,8 @@
+__author__ = ["Carlos Eduardo Sousa Lima"]
+__license__ = "GPL"
+__version__ = "1.0"
+__email__ = "eduardolima@alu.ufc.br"
+
 #%%
 import numpy as np
 import pandas as pd
