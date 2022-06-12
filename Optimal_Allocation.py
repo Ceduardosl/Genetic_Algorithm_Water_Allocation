@@ -1,20 +1,33 @@
-# Adapted of:
-# Ahmed Gad Tutorial
-# https://towardsdatascience.com/genetic-algorithm-implementation-in-python-5ab67bb124a6
+"""
+Optimal Water Allocation based on Genetic Algorithm
+"""
 
 __author__ = ["Carlos Eduardo Sousa Lima"]
 __license__ = "GPL"
 __version__ = "1.0"
 __email__ = "eduardolima@alu.ufc.br"
 
+
 #%%
 import numpy as np
 import pandas as pd
+import os
 
-def fitness_measure(inputs, pop):
+def fitness_measure(weights, inputs, pop, v_aloc):
     #Cálculo da aptidão de cada indíviduo contido na população
-    fitness = np.sum(pop*inputs, axis = 1)
 
+    # fitness = 1/np.sum(weights * np.power(inputs-pop,2), axis = 1)
+    """
+    Removi o quadrado da diferença, pois a função não percebia quando
+    alocava mais água do que o solicitado, fazendo com que atribuisse
+    valores positivos e altos de eficiência, perpetuando para os herdeiros
+    essa característica
+    """
+    fitness = 1/np.sum(weights * np.power(inputs-pop,2), axis = 1)
+    over_id = np.where(pop[:,0] + pop[:,1] > v_aloc)
+
+    fitness[over_id] = np.NINF
+    # print(over_id)
     return (fitness)
 
 def select_individuals(pop, fitness, num_parents):
@@ -54,73 +67,118 @@ def crossover(best_individuals, num_offspring):
 def mutation(offsprings, mutation_rate):
     count = 0
     for i in range(offsprings.shape[0]):
-        mutated_gene_id = np.random.randint(1, offsprings.shape[1])
+        mutated_gene_id = np.random.randint(0, offsprings.shape[1])
         if np.random.random() < mutation_rate:
-            offsprings[i, mutated_gene_id] = offsprings[i, mutated_gene_id] + np.random.uniform(low = -1, high = 1, size = None)
-            print("Mutation occurred in the {}th offspring in the {}th gene".format(i+1, mutated_gene_id))
+            """
+            No primeiro caso, um gene específico sofre uma mutação aleatória
+            No segundo caso, um cromossomo específico sofre alteração em toda sua composição
+            mutation_param[0] = número de genes
+            mutation_param[1] = valor limite da soma
+            """
+            # offsprings[i, mutated_gene_id] = offsprings[i, mutated_gene_id] + np.random.choice([-offsprings[i, mutated_gene_id]/10,offsprings[i, mutated_gene_id]/10],1)[0]
+            offsprings[i, mutated_gene_id] = offsprings[i, mutated_gene_id] + np.random.uniform(-offsprings[i, mutated_gene_id]/2, offsprings[i, mutated_gene_id]/2)
+
+            # print("Mutation occurred in the {}th offspring in the {}th gene".format(i+1, mutated_gene_id+1))
+            # offsprings[i, ] = np.random.dirichlet(np.ones(mutation_param[0])) * mutation_param[1]
+            # print("Mutation occurred in the {}th offspring".format(i+1))
             count += 1                
-    if count == 0:
-        print("No Mutation ocurred")
+    #if count == 0:
+        #print("No Mutation ocurred")
     return (offsprings)
+
+def generate_pop(inputs, shape):
+
+    for i in range(shape[1]):
+        if i == 0:
+            x = np.random.uniform(0.25, 0.75, (shape[0],1))
+        else:
+            x = np.concatenate((x, np.random.uniform(0.25, 0.75, (shape[0],1))), axis = 1)
+    pop = x * inputs
+
+    return (pop) 
+# def generate_pop2(target, shape):
+#     """
+#     Função para gerar dois valores aleatórios dentrod e um range de possíveis valores
+#     de forma que a soma dos valores seja igual a um valor alvo
+#     Importante: Organizar as demanads de acordo com a mais solicitada
+#     """
+#     x = np.random.dirichlet(np.ones(shape[1]), shape[0])
+#     pop = np.fliplr(np.sort(x * target))
+#     return pop
 
 #%%
 if __name__ == "__main__":
-    # Y = w1x1 + w2x2 + w3x3 + w4x4 + w5x5 + w6x6
-    inputs = [4, -2, 3.5, 5, -11, -4.7]
+
+    data = pd.read_csv("{}/Outputs/Annual_reg_65_garan_0.80.csv".format(os.getcwd()))
+    reg_ts = data[["Data", "vol_reg"]]
+    reg = 780
     
-    # Cada Cromossomos possui 6 genes
-    num_genes = 6 #Coeficientes para otimizar
+    demandas = {
+        "urbana":[1, 0.1340*reg],
+        "rural":[1, 0.0685*reg],
+        "animal":[1, 0.1240*reg],
+        "agricultura":[1, 0.6690*reg],
+        "industria":[3, 0.0045*reg]
+    }
+    # Organizar os inputs em ordem crescente de demanda
+    inputs = [demandas["agricultura"][1], demandas["industria"][1]]
+    weights = [demandas["agricultura"][0], demandas["industria"][0]]
+    rate = [0.6690, 0.0045]
 
-    # Número de Cromossomos, cada cromossomo associado a um indivíduo
-    num_chrom = 8
+    num_genes, num_chrom, num_parents,  mutation_rate = [2, 8, 4, 0.60]
+    n_off = (num_chrom - num_parents, num_genes)
+    # População Inicial - Matriz (8x2)
+    num_generation = 1000
 
-    # Número de indivíduos selecionados para o crossover
-    num_parents = 4
-
-    # Taxa de mutação
-    mutation_rate = 0.4
-
-    # População Inicial - Matriz (8x6)
-    pop = np.random.uniform(low = -4, high = 4, size = (num_chrom, num_genes))
-
-    num_generation = 15
-
-    for generation in range(num_generation):
-
-        print("#####-----{}th Geration-----#####\n".format(generation + 1))
-        print("Population")
-        print(pop)
-        print("\n")
-
-        fitness = fitness_measure(inputs, pop)
-        print("Fitness fo individuals: ")
-        print("Best Fitness = {}".format(np.max(fitness)))
-        print(fitness)
-        print("\n")
-
-
-        best_individuals = select_individuals(pop, fitness, num_parents)
-        print("Best individuals:")
-        print(best_individuals)
-        print("\n")
-
-        n_off = (num_chrom - num_parents, num_genes)
-        # o num de descendentes é igual ao num de indivíduos não selecionados
-        offsprings = crossover(
-            best_individuals,
-            num_offspring = (num_chrom - num_parents, num_genes)
-            )
-        print("Offsprings")
-        print(offsprings)
-        print("\n")
-
-        mutated_offsprings = mutation(offsprings, mutation_rate)
-        print("\nMutated Offsprings")
-        print(mutated_offsprings)
-        print("\n")
-
-        pop[0:num_parents, :] = best_individuals
-        pop[num_parents:, :] = mutated_offsprings
 #%%
+for i in range(0, len(reg_ts)):
+    aloc_dict = {
+        "urbana": 0,
+        "rural": 0,
+        "animal": 0,
+        "agricultura": 0,
+        "industria":0 
+        }
+    if reg_ts.iloc[i,1] == 780:
+        print("{} - Todos os usos atentidos".format(reg_ts.iloc[i,0]))
+        aloc_dict["urbana"] = 0.1340*reg
+        aloc_dict["rural"] = 0.0685*reg
+        aloc_dict["animal"] = 0.1240*reg
+        aloc_dict["agricultura"] = 0.6690*reg
+        aloc_dict["industria"] = 0.0045*reg
+        print(aloc_dict)
+        print("Vazão Alocada = {:.2f} hm³\n".format(sum(aloc_dict.values())))
 
-    
+    elif reg_ts.iloc[i,1] < (demandas["urbana"][1] + demandas["rural"][1] + demandas["animal"][1]):
+        print("{} - Usos prioritários parcialmente ou não atendidos".format(reg_ts.iloc[i,0]))
+        print("{:.2f} hm³ para alocar entre os usos prioritários, que exigem {:.2f} hm³\n".format(reg_ts.iloc[i,1], demandas["urbana"][1] + demandas["rural"][1] + demandas["animal"][1]))
+    else:
+        print("{} - Otimizar usos não prioritários".format(reg_ts.iloc[i,0]))
+        aloc_dict["urbana"] = 0.1340*reg
+        aloc_dict["rural"] = 0.0685*reg
+        aloc_dict["animal"] = 0.1240*reg
+        v_aloc = reg_ts.iloc[i,1] - (aloc_dict["urbana"] + aloc_dict["rural"] + aloc_dict["animal"])
+        print("Volume de {:.2f} hm³ para alocar entre usos não prioritários".format(v_aloc))
+        pop = generate_pop(inputs, [num_chrom, num_genes])
+        
+
+        for generation in range(num_generation):
+            #print("#####-----{}th Geration-----#####\n".format(generation + 1))
+            fitness = fitness_measure(weights, inputs, pop, v_aloc)
+            best_individuals = select_individuals(pop, fitness, num_parents)
+            offsprings = crossover(
+                best_individuals,
+                num_offspring = (num_chrom - num_parents, num_genes)
+                ) 
+            mutated_offsprings = mutation(offsprings, mutation_rate)
+            pop[0:num_parents, :] = best_individuals
+            pop[num_parents:, :] = mutated_offsprings
+            #pop = np.where(pop > v_aloc, 0.90 * v_aloc, pop)
+            for i in range(pop.shape[1]):
+                pop[:,i] = np.where(pop[:,i] > inputs[i], 0.9*inputs[i], pop[:,i])
+        print(pop)
+        print("fitness")
+        print(fitness_measure(weights, inputs, pop, v_aloc))
+        print("\n")
+
+#%%
