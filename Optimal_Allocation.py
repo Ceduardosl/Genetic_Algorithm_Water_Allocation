@@ -86,16 +86,17 @@ def mutation(offsprings, mutation_rate):
         #print("No Mutation ocurred")
     return (offsprings)
 
-def generate_pop(inputs, shape):
+def generate_pop(v_aloc, shape):
 
     for i in range(shape[1]):
         if i == 0:
             x = np.random.uniform(0.25, 0.75, (shape[0],1))
         else:
             x = np.concatenate((x, np.random.uniform(0.25, 0.75, (shape[0],1))), axis = 1)
-    pop = x * inputs
+    pop = x * v_aloc
 
     return (pop) 
+
 # def generate_pop2(target, shape):
 #     """
 #     Função para gerar dois valores aleatórios dentrod e um range de possíveis valores
@@ -117,8 +118,8 @@ if __name__ == "__main__":
         "urbana":[1, 0.1340*reg],
         "rural":[1, 0.0685*reg],
         "animal":[1, 0.1240*reg],
-        "agricultura":[1, 0.6690*reg],
-        "industria":[3, 0.0045*reg]
+        "agricultura":[3, 0.6690*reg],
+        "industria":[1, 0.0045*reg]
     }
     # Organizar os inputs em ordem crescente de demanda
     inputs = [demandas["agricultura"][1], demandas["industria"][1]]
@@ -128,7 +129,7 @@ if __name__ == "__main__":
     num_genes, num_chrom, num_parents,  mutation_rate = [2, 8, 4, 0.60]
     n_off = (num_chrom - num_parents, num_genes)
     # População Inicial - Matriz (8x2)
-    num_generation = 1000
+    num_generation = 10000
 
 #%%
 for i in range(0, len(reg_ts)):
@@ -159,7 +160,7 @@ for i in range(0, len(reg_ts)):
         aloc_dict["animal"] = 0.1240*reg
         v_aloc = reg_ts.iloc[i,1] - (aloc_dict["urbana"] + aloc_dict["rural"] + aloc_dict["animal"])
         print("Volume de {:.2f} hm³ para alocar entre usos não prioritários".format(v_aloc))
-        pop = generate_pop(inputs, [num_chrom, num_genes])
+        pop = generate_pop(v_aloc, [num_chrom, num_genes])
         
 
         for generation in range(num_generation):
