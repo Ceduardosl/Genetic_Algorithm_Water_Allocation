@@ -75,9 +75,9 @@ def mutation(offsprings, mutation_rate):
             mutation_param[0] = número de genes
             mutation_param[1] = valor limite da soma
             """
-            # offsprings[i, mutated_gene_id] = offsprings[i, mutated_gene_id] + np.random.choice([-offsprings[i, mutated_gene_id]/10,offsprings[i, mutated_gene_id]/10],1)[0]
-            offsprings[i, mutated_gene_id] = offsprings[i, mutated_gene_id] + np.random.uniform(-offsprings[i, mutated_gene_id]/2, offsprings[i, mutated_gene_id]/2)
-
+            offsprings[i, mutated_gene_id] = offsprings[i, mutated_gene_id] + np.random.uniform(-0.1, 0.1)*offsprings[i, mutated_gene_id]
+            
+            #offsprings[i, mutated_gene_id] = offsprings[i, mutated_gene_id] + np.random.uniform(-offsprings[i, mutated_gene_id]/2, offsprings[i, mutated_gene_id]/2)
             # print("Mutation occurred in the {}th offspring in the {}th gene".format(i+1, mutated_gene_id+1))
             # offsprings[i, ] = np.random.dirichlet(np.ones(mutation_param[0])) * mutation_param[1]
             # print("Mutation occurred in the {}th offspring".format(i+1))
