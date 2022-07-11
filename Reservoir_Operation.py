@@ -18,7 +18,7 @@ def operation(v_max, vo, va, ev, ev_alfa, ev_beta, reg):
     else:
         ev1 = (ev/2)*ev_alfa*np.power(vo + va, ev_beta)
     
-    if ((vo + va) - ev1) > reg/2:
+    if ((vo + va) - ev1) >= reg/2:
         v_reg1 = reg/2
     else:
         v_reg1 = max([0, ((vo + va) - ev1)])
@@ -30,7 +30,7 @@ def operation(v_max, vo, va, ev, ev_alfa, ev_beta, reg):
     else:
         ev2 = (ev/2)*ev_alfa*np.power(v1, ev_beta)
 
-    if (v1 - ev2) > reg/2:
+    if (v1 - ev2) >= reg/2:
         v_reg2 = reg/2 
     else:
         v_reg2 = max([0, (v1 - ev2)])
