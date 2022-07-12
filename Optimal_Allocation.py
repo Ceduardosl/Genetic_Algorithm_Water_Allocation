@@ -17,12 +17,6 @@ def fitness_measure(weights, inputs, pop, v_aloc):
     #Cálculo da aptidão de cada indíviduo contido na população
 
     # fitness = 1/np.sum(weights * np.power(inputs-pop,2), axis = 1)
-    """
-    Removi o quadrado da diferença, pois a função não percebia quando
-    alocava mais água do que o solicitado, fazendo com que atribuisse
-    valores positivos e altos de eficiência, perpetuando para os herdeiros
-    essa característica
-    """
     fitness = 1/np.sum(weights * np.power(inputs-pop,2), axis = 1)
     over_id = np.where(pop[:,0] + pop[:,1] > v_aloc)
 
