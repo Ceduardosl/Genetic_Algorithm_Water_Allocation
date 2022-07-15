@@ -54,7 +54,7 @@ v_max = 1940
 ev_alfa = 0.337665240404597
 ev_beta = 0.842665135414265
 reg_90 = 49.0338371337891
-reg = np.arange(49, 67, 2)
+reg = [65.70]
 
 #%%
 for i in reg:
@@ -82,8 +82,8 @@ for i in reg:
 
     garantia = 1 - sum(result_df["falha"])/len(result_df)
 
-    result_df.to_csv("{}/Outputs/Monthly_reg_{:.0f}_garan_{:.2f}.csv".format(os.getcwd(), i, garantia))
-    df_anual.to_csv("{}/Outputs/Annual_reg_{:.0f}_garan_{:.2f}.csv".format(os.getcwd(), i, garantia))
+    result_df.to_csv("{}/Outputs/Monthly_reg_{:.2f}_garan_{:.2f}.csv".format(os.getcwd(), i, garantia))
+    df_anual.to_csv("{}/Outputs/Annual_reg_{:.2f}_garan_{:.2f}.csv".format(os.getcwd(), i, garantia))
     # fig, (ax1, ax2) = plt.subplots(2,1,dpi = 600)
     # ax1.set_title("Regularização = {:.2f} hm³/mês | Garantia = {:.2%}".format(i, garantia))
     # ax1.plot(result_df["Data"], result_df["storage"], ls = "-", c = "blue", zorder = 3, label = "1-Volume / 2-Regularização")

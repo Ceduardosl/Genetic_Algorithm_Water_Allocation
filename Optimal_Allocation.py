@@ -104,13 +104,13 @@ def generate_pop(v_aloc, shape):
 #%%
 if __name__ == "__main__":
 
-    data = pd.read_csv("{}/Outputs/Annual_reg_65_garan_0.80.csv".format(os.getcwd()))
+    data = pd.read_csv("{}/Outputs/Annual_reg_65.70_garan_0.80.csv".format(os.getcwd()))
     reg_ts = data[["Data", "vol_reg"]]
-    reg = 780
+    reg = 788.400000
     
     demandas = {
-        "urbana":[1, 0.1340*reg],
-        "rural":[1, 0.0685*reg],
+        "urbana":[1, 0.1345*reg],
+        "rural":[1, 0.0680*reg],
         "animal":[1, 0.1240*reg],
         "agricultura":[3, 0.6690*reg],
         "industria":[1, 0.0045*reg]
@@ -127,6 +127,7 @@ if __name__ == "__main__":
 
 #%%
 for i in range(0, len(reg_ts)):
+
     aloc_dict = {
         "urbana": 0,
         "rural": 0,
@@ -134,7 +135,9 @@ for i in range(0, len(reg_ts)):
         "agricultura": 0,
         "industria":0 
         }
-    if reg_ts.iloc[i,1] == 780:
+
+    if np.round(reg_ts.iloc[i,1],2) == reg:
+        
         print("{} - Todos os usos atentidos".format(reg_ts.iloc[i,0]))
         aloc_dict["urbana"] = 0.1340*reg
         aloc_dict["rural"] = 0.0685*reg
